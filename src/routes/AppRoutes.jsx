@@ -7,6 +7,7 @@ import MainLayout from "../layout/MainLayout";
 import Home from "../pages/Home";
 import Groups from "../pages/Groups";
 import Profile from "../pages/Profile";
+import Groceries from "../pages/Groceries";
 import NotFound from "../pages/NotFound";
 import Login from "../pages/Login";
 
@@ -37,7 +38,9 @@ export default function AppRoutes() {
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
             <Route path="/groups" element={<Groups />} />
+            <Route path="/groceries" element={<Groceries />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="*" element={<NotFound />} />
           </Route>
         ) : (
           <>
@@ -45,7 +48,6 @@ export default function AppRoutes() {
             <Route path="*" element={<Navigate to="/login" replace />} />
           </>
         )}
-        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
