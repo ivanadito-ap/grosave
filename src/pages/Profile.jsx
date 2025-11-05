@@ -1,7 +1,12 @@
 import React from "react";
-import { User, Mail, Calendar, MapPin } from "lucide-react";
+import { User, Mail, Calendar, MapPin, LogOut } from "lucide-react";
+import { signOut } from "firebase/auth";
+import { auth } from "../firebase";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
+  const navigate = useNavigate();
+
   // Temporary mock user data
   const user = {
     name: "Haru Urara",
@@ -10,6 +15,16 @@ export default function Profile() {
     location: "Ciledug, Indonesia",
     avatar:
       "https://api.dicebear.com/7.x/avataaars/svg?seed=Raditya&backgroundColor=b6e3f4,c0aede,d1d4f9",
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log("User logged out");
+      navigate("/login"); // redirect to login page
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
   };
 
   return (
@@ -47,11 +62,20 @@ export default function Profile() {
           </div>
         </div>
 
-        {/* Action button */}
-        <div className="text-center mt-8">
+        {/* Action buttons */}
+        <div className="flex flex-col gap-3 text-center mt-8">
           <button className="btn btn-outline btn-primary">
             <User size={18} />
             Edit Profile
+          </button>
+
+          {/* Logout button */}
+          <button
+            onClick={handleLogout}
+            className="btn btn-outline btn-error flex items-center justify-center gap-2"
+          >
+            <LogOut size={18} />
+            Log Out
           </button>
         </div>
       </div>
