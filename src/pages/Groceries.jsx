@@ -19,7 +19,7 @@ export default function Groceries() {
 
         <div className="overflow-x-auto rounded-lg shadow-md border border-base-300">
           <table className="table w-full">
-            <thead className="bg-gradient-to-r from-primary to-secondary text-base-100 uppercase tracking-wider">
+            <thead className="bg-linear-to-r from-primary to-secondary text-base-100 uppercase tracking-wider">
               <tr>
                 <th className="py-3">#</th>
                 <th>Name</th>

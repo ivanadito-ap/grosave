@@ -4,7 +4,7 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-base-content">
       {/* Hero Section */}
-      <section className="hero min-h-[80vh] bg-gradient-to-b from-[#121212] to-[#0f2018] text-center px-6 py-16">
+      <section className="hero min-h-[80vh] bg-linear-to-b from-[#121212] to-[#0f2018] text-center px-6 py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-5xl md:text-6xl font-bold text-primary mb-6">
             Save More, Waste Less 🛒
