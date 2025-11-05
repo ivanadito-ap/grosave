@@ -17,14 +17,14 @@ export default function Groceries() {
           Track your grocery items, check expiry dates, and manage your stock efficiently.
         </p>
 
-        <div className="overflow-x-auto rounded-lg shadow-md border border-base-300">
+        <div className="overflow-x-auto rounded-lg shadow-md border border-base-300-white">
           <table className="table w-full">
             <thead className="bg-linear-to-r from-primary to-secondary text-base-100 uppercase tracking-wider">
               <tr>
-                <th className="py-3">#</th>
-                <th>Name</th>
-                <th>Type</th>
-                <th>Expiry Date</th>
+                <th className="py-3 text-white">#</th>
+                <th className="text-white">Name</th>
+                <th className="text-white">Type</th>
+                <th className="text-white">Expiry Date</th>
               </tr>
             </thead>
             <tbody className="bg-base-200 text-base-content">
