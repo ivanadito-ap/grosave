@@ -37,7 +37,7 @@ export default function Groups() {
   };
 
   return (
-    <div className="min-h-screen bg-base-100 text-white px-6 py-11">
+    <div className="min-h-screen bg-base-100 text-white px-6 pt-24 pb-10">
       <div className="max-w-5xl mx-auto">
         {/* Header Section */}
         <div className="flex items-center justify-between mb-8">
