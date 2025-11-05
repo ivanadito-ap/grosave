@@ -57,10 +57,10 @@ function Navbar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center gap-2 transition-all duration-200 ${
+                  className={`flex items-center gap-2 transition-all duration-200 outline-none ${
                     location.pathname === item.path
-                      ? "text-primary font-semibold"
-                      : "hover:bg-base-200"
+                      ? "!text-primary font-semibold !bg-base-100"
+                      : "hover:bg-base-100 hover:text-primary"
                   }`}
                 >
                   <Icon className="h-4 w-4" />
