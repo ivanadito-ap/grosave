@@ -1,6 +1,12 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function Home() {
+  const navigate = useNavigate();
+  const handleLearnMore = () => {
+    navigate("/learn-more");
+  };
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-base-content">
       {/* Hero Section */}
@@ -19,7 +25,10 @@ export default function Home() {
             <button className="btn btn-primary px-8 text-base font-semibold">
               Get Started
             </button>
-            <button className="btn btn-outline text-base text-gray-200 border-gray-400 hover:border-primary hover:text-primary">
+            <button 
+              onClick={handleLearnMore}
+              className="btn btn-outline text-base text-gray-200 border-gray-400 hover:border-primary hover:text-primary"
+              >
               Learn More
             </button>
           </div>
