@@ -10,6 +10,7 @@ import Profile from "../pages/Profile";
 import Groceries from "../pages/Groceries";
 import NotFound from "../pages/NotFound";
 import Login from "../pages/Login";
+import LearnMore from "../pages/LearnMore";
 
 export default function AppRoutes() {
   const [user, setUser] = useState(null);
@@ -37,6 +38,7 @@ export default function AppRoutes() {
         {user ? (
           <Route element={<MainLayout />}>
             <Route path="/" element={<Home />} />
+            <Route path="/learn-more" element={<LearnMore/>}></Route>
             <Route path="/groups" element={<Groups />} />
             <Route path="/groceries" element={<Groceries />} />
             <Route path="/profile" element={<Profile />} />
