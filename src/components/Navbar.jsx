@@ -7,7 +7,6 @@ function Navbar() {
   const navItems = [
     { path: "/", label: "Home", icon: Home },
     { path: "/groups", label: "Groups", icon: Users },
-    { path: "/groceries", label: "Groceries", icon: ShoppingBasket },
     { path: "/profile", label: "Profile", icon: User },
   ];
 
