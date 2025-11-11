@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { PlusCircle, Users } from "lucide-react";
 import { db } from "../firebase";
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { useNavigate } from "react-router-dom";
 import ModalCreateGroup from "../components/ModalCreateGroup";
 import useAuth from "../hooks/useAuth";
 
@@ -12,6 +13,10 @@ export default function Groups() {
   const [newGroup, setNewGroup] = useState({ name: "", budget: "" });
   const [groupsLoading, setGroupsLoading] = useState(true); 
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
+  const handleGroceries = () => {
+    navigate("/groceries");
+  }
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -128,7 +133,10 @@ export default function Groups() {
                     Budget: Rp {group.budget.toLocaleString()}
                   </p>
                   <div className="card-actions justify-end mt-4">
-                    <button className="btn btn-sm btn-outline btn-accent">
+                    <button 
+                    onClick={handleGroceries}
+                    className="btn btn-sm btn-outline btn-accent"
+                    >
                       View
                     </button>
                   </div>
