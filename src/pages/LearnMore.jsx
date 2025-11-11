@@ -20,19 +20,19 @@ export default function LearnMore() {
                 <section className="mb-12">
                     <h2 className="text-2xl font-semibold mb-4">How It Works</h2>
                     <div className="grid gap-6">
-                        <div className="card bg-[#1e1e1e] shadow-lg border border-[#2f2f2f]">
+                        <div className="card bg-[#1e1e1e] shadow-lg border hover:border-primary border-[#2f2f2f] transition-all">
                             <div className="card-body">
                                 <h3 className="text-xl font-semibold text-primary">Track Your Groceries</h3>
                                 <p className="text-gray-300">Log your purchases, set expiry reminders, and monitor your pantry inventory.</p>
                             </div>
                         </div>
-                        <div className="card bg-[#1e1e1e] shadow-lg border border-[#2f2f2f]">
+                        <div className="card bg-[#1e1e1e] shadow-lg border hover:border-primary border-[#2f2f2f] transition-all">
                             <div className="card-body">
                                 <h3 className="text-xl font-semibold text-primary">Analyze Your Spendings</h3>
                                 <p className="text-gray-300">Get insights into your spending patterns and find opportunities to save.</p>
                             </div>
                         </div>
-                        <div className="card bg-[#1e1e1e] shadow-lg border border-[#2f2f2f]">
+                        <div className="card bg-[#1e1e1e] shadow-lg border hover:border-primary border-[#2f2f2f] transition-all">
                             <div className="card-body">
                                 <h3 className="text-xl font-semibold text-primary">Reduce Waste</h3>
                                 <p className="text-gray-300">Receive alerts for items nearing expiration and tips to minimize food waste.</p>
