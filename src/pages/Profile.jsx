@@ -1,35 +1,20 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { User, Mail, Calendar, MapPin, LogOut, Image as ImageIcon } from "lucide-react";
-import { signOut, updateProfile, onAuthStateChanged } from "firebase/auth";
-import { auth } from "../firebase";
+import { updateProfile } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
+import useAuth from "../hooks/useAuth";
 
 export default function Profile() {
   const navigate = useNavigate();
+  const { user: currentUser, loading, signOut } = useAuth();
 
-  const [currentUser, setCurrentUser] = useState(auth.currentUser);
   const [displayName, setDisplayName] = useState("");
   const [photoURL, setPhotoURL] = useState("");
   const [location, setLocation] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (u) => setCurrentUser(u));
-    return () => unsub();
-  }, []);
-
-  const joined = useMemo(() => {
-    if (!currentUser?.metadata?.creationTime) return "";
-    try {
-      const d = new Date(currentUser.metadata.creationTime);
-      return d.toLocaleString(undefined, { month: "long", year: "numeric" });
-    } catch {
-      return "";
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
+  React.useEffect(() => {
     if (!currentUser) return;
     setDisplayName(currentUser.displayName || currentUser.email?.split("@")[0] || "");
     setPhotoURL(
@@ -44,11 +29,21 @@ export default function Profile() {
     }
   }, [currentUser]);
 
+  const joined = React.useMemo(() => {
+    if (!currentUser?.metadata?.creationTime) return "";
+    try {
+      const d = new Date(currentUser.metadata.creationTime);
+      return d.toLocaleString(undefined, { month: "long", year: "numeric" });
+    } catch {
+      return "";
+    }
+  }, [currentUser]);
+
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await signOut(); // Use hook's signOut
       console.log("User logged out");
-      navigate("/login"); // redirect to login page
+      navigate("/login");
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -78,7 +73,6 @@ export default function Profile() {
       try {
         localStorage.setItem(`gs_location_${currentUser.uid}`, location || "");
       } catch {}
-      setCurrentUser({ ...auth.currentUser });
       closeEdit();
     } catch (err) {
       console.error(err);
@@ -87,6 +81,22 @@ export default function Profile() {
       setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-100">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
+  }
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-100">
+        <p className="text-lg">Please log in to view your profile</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-base-content px-4 py-12">

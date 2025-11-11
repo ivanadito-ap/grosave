@@ -1,4 +1,3 @@
-// src/components/Navbar.jsx
 import { Link, useLocation } from "react-router-dom";
 import { Home, Users, ShoppingBasket, User, Menu } from "lucide-react";
 

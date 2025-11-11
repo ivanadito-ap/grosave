@@ -1,19 +1,26 @@
 import { useEffect, useState } from "react";
 import { PlusCircle, Users } from "lucide-react";
-import { db, auth } from "../firebase";
+import { db } from "../firebase";
 import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
 import ModalCreateGroup from "../components/ModalCreateGroup";
+import useAuth from "../hooks/useAuth";
 
 export default function Groups() {
+  const { user, loading: authLoading } = useAuth();
   const [groups, setGroups] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGroup, setNewGroup] = useState({ name: "", budget: "" });
-  const [isLoading, setIsLoading] = useState(true); // Changed to true initially
+  const [groupsLoading, setGroupsLoading] = useState(true); 
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchGroups = async (user) => {
+    const fetchGroups = async () => {
+      if (!user) {
+        setGroups([]);
+        setGroupsLoading(false);
+        return;
+      }
+
       try {
         const q = query(
           collection(db, 'groups'),
@@ -29,23 +36,12 @@ export default function Groups() {
         console.error("Error fetching groups:", error);
         setError(error.message);
       } finally {
-        setIsLoading(false);
+        setGroupsLoading(false);
       }
     };
 
-    // Listen to auth state changes
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        fetchGroups(user);
-      } else {
-        setGroups([]);
-        setIsLoading(false);
-      }
-    });
-
-    // Cleanup subscription
-    return () => unsubscribe();
-  }, []);
+    fetchGroups();
+  }, [user]);
 
   const handleCreateGroup = async (groupData) => {
     if (!groupData.name || !groupData.budget || groupData.members.length === 0) {
@@ -53,36 +49,38 @@ export default function Groups() {
       return;
     }
 
-    setIsLoading(true);
+    setGroupsLoading(true);
     try {
       const docRef = await addDoc(collection(db, "groups"), {
         name: groupData.name,
         budget: parseInt(groupData.budget),
-        members: [...groupData.members, auth.currentUser?.email], // Include current user
-        memberIds: [auth.currentUser?.uid], // Store user IDs for security rules
+        members: [...groupData.members, user.email],
+        memberIds: [user.uid],
         createdAt: new Date(),
-        createdBy: auth.currentUser?.uid
+        createdBy: user.uid
       });
 
-      const newGroupData = {
+      const newGroupObj = {
         id: docRef.id,
         ...groupData,
-        members: [...groupData.members, auth.currentUser?.email],
-        memberIds: [auth.currentUser?.uid],
+        members: [...groupData.members, user.email],
+        memberIds: [user.uid],
         createdAt: new Date(),
-        createdBy: auth.currentUser?.uid
+        createdBy: user.uid
       };
 
-      setGroups(prevGroups => [...prevGroups, newGroupData]);
+      setGroups(prevGroups => [...prevGroups, newGroupObj]);
       setNewGroup({ name: "", budget: "" });
       setIsModalOpen(false);
     } catch (error) {
       console.error("Error creating group:", error);
       alert("Failed to create group: " + error.message);
     } finally {
-      setIsLoading(false);
+      setGroupsLoading(false);
     }
   };
+
+   const isLoading = authLoading || groupsLoading;
 
   return (
     <div className="min-h-screen bg-base-100 text-white px-6 pt-24 pb-10">
@@ -123,7 +121,7 @@ export default function Groups() {
               >
                 <div className="card-body">
                   <h2 className="card-title text-primary">{group.name}</h2>
-                  <p className="flex items-center justify-center gap-2 text-sm text-gray-300">
+                  <p className="flex items-center justify-center pl-1 gap-2 text-sm text-gray-300">
                     <Users size={16} /> {group.members.join(", ")}
                   </p>
                   <p className="mt-2 text-sm text-gray-400">
@@ -144,12 +142,6 @@ export default function Groups() {
         {!isLoading && !error && groups.length === 0 && (
           <div className="text-center mt-20 text-gray-400">
             <p>You haven't joined or created any groups yet.</p>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="btn btn-primary mt-4"
-            >
-              Create Your First Group
-            </button>
           </div>
         )}
       </div>
