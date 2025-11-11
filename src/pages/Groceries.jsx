@@ -1,48 +1,191 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { db, auth } from "../firebase";
+import {
+  collection,
+  addDoc,
+  onSnapshot,
+  query,
+  orderBy,
+  serverTimestamp,
+  deleteDoc,
+  doc,
+} from "firebase/firestore";
 
 export default function Groceries() {
-    // eslint-disable-next-line no-unused-vars
-    const [groceries, setGroceries] = useState([
-    { id: 1, name: "Milk", type: "Dairy", expiry: "15 Nov 2025" },
-    { id: 2, name: "Eggs", type: "Poultry", expiry: "16 Nov 2025" },
-    { id: 3, name: "Apples", type: "Fruit", expiry: "20 Nov 2025" },
-  ]);
+  const groupId = "2jMLi9hAYz0IQWSEh1Kt";
+  const [groceries, setGroceries] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-primary px-4 py-10">
+  // input states
+  const [newItem, setNewItem] = useState("");
+  const [type, setType] = useState("");
+  const [boughtDate, setBoughtDate] = useState("");
+  const [expiry, setExpiry] = useState("");
+
+  useEffect(() => {
+    console.log("🔍 Setting up listener for group:", groupId);
+    const groceriesRef = collection(db, "groups", groupId, "groceries");
+    const q = query(groceriesRef, orderBy("createdAt", "desc"));
+
+    const unsubscribe = onSnapshot(
+      q,
+      (snapshot) => {
+        console.log("✅ Snapshot triggered. Docs:", snapshot.docs.length);
+        snapshot.docs.forEach((d) =>
+          console.log("📄", d.id, "=>", d.data())
+        );
+        const items = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setGroceries(items);
+        setLoading(false);
+      },
+      (err) => {
+        console.error("❌ Firestore snapshot error:", err);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [groupId]);
+
+  const addGrocery = async () => {
+    try {
+      const user = auth.currentUser;
+      console.log("🧾 Adding grocery as:", user?.email);
+      await addDoc(collection(db, "groups", groupId, "groceries"), {
+        name: newItem || "Unnamed",
+        type: type || "Unknown",
+        boughtDate: boughtDate || "N/A",
+        expiry: expiry || "N/A",
+        createdAt: serverTimestamp(),
+        createdBy: user?.email || "anonymous",
+      });
+      setNewItem("");
+      setType("");
+      setBoughtDate("");
+      setExpiry("");
+    } catch (err) {
+      console.error("❌ AddDoc error:", err);
+    }
+  };
+
+ const deleteGrocery = async (id) => {
+  console.log("🗑️ Trying to delete grocery:", id);
+  try {
+    await deleteDoc(doc(db, "groups", groupId, "groceries", id));
+    console.log("✅ Deleted successfully");
+  } catch (err) {
+    console.error("❌ Delete error:", err);
+    alert("Delete failed: " + err.message);
+  }
+};
+
+  return (
+    <div className="min-h-screen flex flex-col items-center bg-base-100 text-primary px-4 py-10">
       <div className="w-full max-w-4xl bg-neutral rounded-2xl shadow-xl p-8">
-        <h1 className="text-4xl font-bold text-center mb-6">🍎 My Groceries</h1>
+        <h1 className="text-4xl font-bold text-center mb-6">
+          🍎 Group Groceries
+        </h1>
 
-        <p className="text-center text-secondary mb-8">
-          Track your grocery items, check expiry dates, and manage your stock efficiently.
-        </p>
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-3 mb-8">
+          <div className="flex flex-col">
+            <label className="text-xs text-secondary mb-1">Item Name</label>
+            <input
+              type="text"
+              value={newItem}
+              onChange={(e) => setNewItem(e.target.value)}
+              placeholder="e.g. Milk"
+              className="input input-bordered"
+            />
+          </div>
 
-        <div className="overflow-x-auto rounded-lg shadow-md border border-base-300-white">
-          <table className="table w-full">
-            <thead className="bg-linear-to-r from-primary to-secondary text-base-100 uppercase tracking-wider">
-              <tr>
-                <th className="py-3 text-white">#</th>
-                <th className="text-white">Name</th>
-                <th className="text-white">Type</th>
-                <th className="text-white">Expiry Date</th>
-              </tr>
-            </thead>
-            <tbody className="bg-base-200 text-base-content">
-              {groceries.map((item, index) => (
-                <tr key={item.id} className="hover:bg-base-300 transition-colors">
-                  <td>{index + 1}</td>
-                  <td>{item.name}</td>
-                  <td>{item.type}</td>
-                  <td>{item.expiry}</td>
+          <div className="flex flex-col">
+            <label className="text-xs text-secondary mb-1">Type</label>
+            <input
+              type="text"
+              value={type}
+              onChange={(e) => setType(e.target.value)}
+              placeholder="e.g. Dairy"
+              className="input input-bordered"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs text-secondary mb-1">Date Bought</label>
+            <input
+              type="date"
+              value={boughtDate}
+              onChange={(e) => setBoughtDate(e.target.value)}
+              className="input input-bordered"
+            />
+          </div>
+
+          <div className="flex flex-col">
+            <label className="text-xs text-secondary mb-1">Expiry Date</label>
+            <input
+              type="date"
+              value={expiry}
+              onChange={(e) => setExpiry(e.target.value)}
+              className="input input-bordered"
+            />
+          </div>
+
+          <div className="flex items-end">
+            <button onClick={addGrocery} className="btn btn-primary w-full">
+              Add
+            </button>
+          </div>
+        </div>
+
+        {loading ? (
+          <p className="text-center text-sm text-secondary opacity-70">
+            Loading your groceries...
+          </p>
+        ) : groceries.length === 0 ? (
+          <p className="text-center text-sm opacity-70">
+            No groceries yet. Try adding one!
+          </p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="table w-full table-zebra">
+              <thead>
+                <tr className="text-secondary">
+                  <th>#</th>
+                  <th>Item Name</th>
+                  <th>Type</th>
+                  <th>Date Bought</th>
+                  <th>Expiry Date</th>
+                  <th>Added By</th>
+                  <th>Action</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
-        <div className="text-center mt-8">
-          <button className="btn btn-primary px-8">+ Add Item</button>
-        </div>
+              </thead>
+              <tbody>
+                {groceries.map((item, i) => (
+                  <tr key={item.id}>
+                    <td>{i + 1}</td>
+                    <td className="font-semibold">{item.name}</td>
+                    <td>{item.type}</td>
+                    <td>{item.boughtDate}</td>
+                    <td>{item.expiry}</td>
+                    <td className="text-xs opacity-70">
+                      {item.createdBy || "—"}
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => deleteGrocery(item.id)}
+                        className="btn btn-error btn-xs"
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
