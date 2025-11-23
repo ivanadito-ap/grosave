@@ -1,10 +1,98 @@
 import React, { useState, useEffect } from 'react';
-import { Trash2, Plus } from "lucide-react";
+import { Trash2, Plus, AlertCircle } from "lucide-react";
 import { useNavigate } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import useGroceries from '../hooks/useGroceries';
+import useExpirationStatus from '../hooks/useExpirationStatus';
 import { db } from '../firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore';
+
+// Move helper functions outside the component
+const getRowClassName = (status) => {
+  switch (status) {
+    case 'expired':
+      return 'bg-red-900/30 hover:bg-red-900/50';
+    case 'today':
+      return 'bg-orange-900/30 hover:bg-orange-900/50';
+    case 'expiring-soon':
+      return 'bg-yellow-900/30 hover:bg-yellow-900/50';
+    case 'warning':
+      return 'bg-yellow-800/20 hover:bg-yellow-800/30';
+    default:
+      return 'hover:bg-base-300 transition-colors';
+  }
+};
+
+const StatusBadge = ({ daysLeft, status }) => {
+  switch (status) {
+    case 'expired':
+      return (
+        <div className="badge badge-error gap-2">
+          <AlertCircle size={14} />
+          EXPIRED
+        </div>
+      );
+    case 'today':
+      return (
+        <div className="badge badge-warning gap-2">
+          <AlertCircle size={14} />
+          TODAY
+        </div>
+      );
+    case 'expiring-soon':
+      return (
+        <div className="badge badge-warning gap-2">
+          <AlertCircle size={14} />
+          {daysLeft} day{daysLeft !== 1 ? 's' : ''} left
+        </div>
+      );
+    case 'warning':
+      return (
+        <div className="badge badge-info gap-2">
+          {daysLeft} days left
+        </div>
+      );
+    default:
+      return (
+        <div className="badge badge-success gap-2">
+          {daysLeft} days left
+        </div>
+      );
+  }
+};
+
+// Helper function to calculate expiration status (not a hook)
+const calculateExpirationStatus = (expiryDate) => {
+  if (!expiryDate) {
+    return { daysLeft: null, status: 'unknown' };
+  }
+
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const expiry = new Date(expiryDate);
+    expiry.setHours(0, 0, 0, 0);
+
+    const diffTime = expiry - today;
+    const daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (daysLeft < 0) {
+      return { daysLeft: 0, status: 'expired' };
+    } else if (daysLeft === 0) {
+      return { daysLeft: 0, status: 'today' };
+    } else if (daysLeft <= 3) {
+      return { daysLeft, status: 'expiring-soon' };
+    } else if (daysLeft <= 7) {
+      return { daysLeft, status: 'warning' };
+    } else {
+      return { daysLeft, status: 'good' };
+    }
+  } catch (error) {
+    console.error('Error calculating expiration:', error);
+    return { daysLeft: null, status: 'unknown' };
+  }
+};
 
 export default function Groceries() {
   const { user } = useAuth();
@@ -51,13 +139,11 @@ export default function Groceries() {
   const [formData, setFormData] = useState({ name: "", type: "Dairy", expiry: "" });
   const [isAdding, setIsAdding] = useState(false);
 
-  // update input values
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // submit form
   const handleAddGrocery = async (e) => {
     e?.preventDefault();
     if (!formData.name || !formData.expiry) {
@@ -198,6 +284,31 @@ export default function Groceries() {
           </div>
         )}
 
+        {/* Expiration Legend */}
+        {!groceriesLoading && groceries.length > 0 && (
+          <div className="mb-6 p-4 bg-base-200 rounded-lg">
+            <p className="text-sm text-gray-400 mb-2">Status Legend:</p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-red-600 rounded"></div>
+                <span>Expired</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-orange-600 rounded"></div>
+                <span>Today</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-yellow-600 rounded"></div>
+                <span>3 Days Left</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-yellow-700 rounded"></div>
+                <span>7 Days Left</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Groceries Table */}
         {!groceriesLoading && groceries.length > 0 && (
           <div className="overflow-x-auto rounded-lg shadow-md border border-base-300">
@@ -208,27 +319,34 @@ export default function Groceries() {
                   <th className="text-white">Name</th>
                   <th className="text-white">Type</th>
                   <th className="text-white">Expiry Date</th>
+                  <th className="text-white">Status</th>
                   <th className="text-white">Actions</th>
                 </tr>
               </thead>
               <tbody className="bg-base-200 text-base-content">
-                {groceries.map((item, index) => (
-                  <tr key={item.id} className="hover:bg-base-300 transition-colors">
-                    <td>{index + 1}</td>
-                    <td className="font-semibold">{item.name}</td>
-                    <td>{item.type}</td>
-                    <td>{item.expiry}</td>
-                    <td>
-                      <button
-                        onClick={() => handleDeleteGrocery(item.id)}
-                        className="btn btn-sm btn-error btn-outline flex items-center gap-1"
-                      >
-                        <Trash2 size={16} />
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                {groceries.map((item, index) => {
+                  const { daysLeft, status } = calculateExpirationStatus(item.expiry);
+                  return (
+                    <tr key={item.id} className={getRowClassName(status)}>
+                      <td>{index + 1}</td>
+                      <td className="font-semibold">{item.name}</td>
+                      <td>{item.type}</td>
+                      <td>{item.expiry}</td>
+                      <td>
+                        <StatusBadge daysLeft={daysLeft} status={status} />
+                      </td>
+                      <td>
+                        <button
+                          onClick={() => handleDeleteGrocery(item.id)}
+                          className="btn btn-sm btn-error btn-outline flex items-center gap-1"
+                        >
+                          <Trash2 size={16} />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
