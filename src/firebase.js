@@ -4,12 +4,12 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyC7h9MZdxG32Iyx9D_V7urcRGsX1Mio41g",
-  authDomain: "grosave-d4a4b.firebaseapp.com", // 👈 MUST be here
-  projectId: "grosave-d4a4b",
-  storageBucket: "grosave-d4a4b.firebasestorage.app",
-  messagingSenderId: "589110361745",
-  appId: "1:589110361745:web:c52ca25e463cd7ead60930"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID
 };
 
 const app = initializeApp(firebaseConfig);
