@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Trash2, Plus, AlertCircle } from "lucide-react";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import useAuth from '../hooks/useAuth';
 import useGroceries from '../hooks/useGroceries';
-import useExpirationStatus from '../hooks/useExpirationStatus';
 import { db } from '../firebase'
 import { collection, getDocs, query, where } from 'firebase/firestore';
 
@@ -97,6 +96,10 @@ const calculateExpirationStatus = (expiryDate) => {
 export default function Groceries() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  const groupIdFromUrl = searchParams.get('groupId');
+  
   const [selectedGroupId, setSelectedGroupId] = useState(null);
   const [groups, setGroups] = useState([]);
   const [groupsLoading, setGroupsLoading] = useState(true);
@@ -120,7 +123,10 @@ export default function Groceries() {
           ...d.data()
         }));
         setGroups(groupsData);
-        if (groupsData.length > 0) {
+
+        if (groupIdFromUrl) {
+          setSelectedGroupId(groupIdFromUrl);
+        } else if (groupsData.length > 0) {
           setSelectedGroupId(groupsData[0].id);
         } else {
           setSelectedGroupId(null);
@@ -133,7 +139,7 @@ export default function Groceries() {
     };
 
     fetchUserGroups();
-  }, [user]);
+  }, [user, groupIdFromUrl]);
 
   const { groceries, loading: groceriesLoading, error, addGrocery, deleteGrocery } = useGroceries(selectedGroupId);
   const [formData, setFormData] = useState({ name: "", type: "Dairy", expiry: "" });

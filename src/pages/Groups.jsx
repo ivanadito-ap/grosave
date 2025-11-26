@@ -14,9 +14,10 @@ export default function Groups() {
   const [groupsLoading, setGroupsLoading] = useState(true); 
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const handleGroceries = () => {
-    navigate("/groceries");
-  }
+
+  const handleGroceries = (groupId) => {
+    navigate(`/groceries?groupId=${groupId}`);
+  };
 
   useEffect(() => {
     const fetchGroups = async () => {
@@ -134,7 +135,7 @@ export default function Groups() {
                   </p>
                   <div className="card-actions justify-end mt-4">
                     <button 
-                    onClick={handleGroceries}
+                    onClick={() => handleGroceries(group.id)}
                     className="btn btn-sm btn-outline btn-accent"
                     >
                       View
