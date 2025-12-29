@@ -1,16 +1,36 @@
-# React + Vite
+# Grosave 🛒
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Grosave** is a smart grocery shopping assistant designed to help users track, compare, and save money on their weekly groceries. By aggregating price data from major supermarkets, Grosave ensures you never overpay for your essentials.
 
-Currently, two official plugins are available:
+[![Live Demo](https://img.shields.io/badge/Live-Demo-brightgreen)](https://grosave.co.nz/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+- **Price Comparison:** Instantly compare the total cost of your shopping basket across different retailers.
+- **Historical Data:** View price trends to see if a "sale" price is actually a good deal.
+- **Personalized Lists:** Create and manage multiple shopping lists that sync across your devices.
+- **Smart Alerts:** Get notified when items on your watchlist hit their lowest price.
+- **Location Based:** Find the cheapest stores nearest to your current location.
 
-## Expanding the ESLint configuration
+## 🛠 Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Frontend:** [Next.js](https://nextjs.org/) / [React](https://reactjs.org/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Backend:** Node.js (Express)
+- **Database:** PostgreSQL / Supabase
+- **Deployment:** [Vercel](https://vercel.com/)
+
+---
+
+## 🚀 Getting Started
+
+Follow these instructions to get a copy of the project up and running on your local machine for development and testing purposes.
+
+### Prerequisites
+
+* npm
+  ```bash
+  npm install npm@latest -g
